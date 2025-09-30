@@ -65,6 +65,7 @@ public class Agent<T extends BaseContext> {
                 .description(description)
                 .model(model)
                 .context((T) context.cloneContext())
+                .tools(tools)
                 .build();
     }
 
