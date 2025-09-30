@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
+import org.mytest.test.agent.Agent;
 import org.mytest.test.model.BaseModel;
 import org.mytest.test.model.ReActModel;
 import org.mytest.test.tool.definition.BaseTool;
@@ -20,7 +21,7 @@ import java.util.Map;
 public class ReActModelContext extends BaseContext {
 
     @Builder.Default
-    private Map<String, BaseModel> subTask = new HashMap<>();
+    private Map<String, Agent<?>> subTask = new HashMap<>();
 
     @Builder.Default
     private List<String> files = new LinkedList<>();

@@ -7,6 +7,7 @@ import dev.langchain4j.data.message.*;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.mytest.test.agent.Agent;
 import org.mytest.test.constant.AgentState;
 import org.mytest.test.constant.ResponseType;
 import org.mytest.test.context.ReActModelContext;
@@ -29,8 +30,7 @@ public class ReActModel extends BaseModel<ReActModelContext> {
         if (context.getActions().isEmpty()) {
             context.setAgentState(AgentState.FINISHED);
             return switch (context.getMemory().getLast()) {
-                case UserMessage userMessage ->
-                        Response.normal(((TextContent) userMessage.contents().get(0)).text());
+                case UserMessage userMessage -> Response.normal(((TextContent) userMessage.contents().get(0)).text());
                 case AiMessage aiMessage -> Response.normal(aiMessage.text());
                 default -> Response.normal("异常回复");
             };
@@ -78,11 +78,11 @@ public class ReActModel extends BaseModel<ReActModelContext> {
         }
 
         Set<String> rowKeySet = table.rowKeySet();
-        for (String rowKey : rowKeySet){
-            BaseModel<?> model = context.getSubTask().get(rowKey);
+        for (String rowKey : rowKeySet) {
+            Agent<?> agent = context.getSubTask().get(rowKey);
             Map<String, String> rows = table.row(rowKey);
-            model.captureAskResult(rows);
-            model.run();
+            agent.captureAskResult(rows);
+            agent.getModel().run();
         }
 
     }
@@ -124,14 +124,4 @@ public class ReActModel extends BaseModel<ReActModelContext> {
         return List.of();
     }
 
-    @Override
-    public void captureAskResult(Map<String, String> rows){
-        for (Map.Entry<String, String> entry : rows.entrySet()) {
-            String id = entry.getKey();
-            String resultVal = entry.getValue();
-            ToolExecutionResultMessage result = ToolExecutionResultMessage.from(AgentUtils.findToolCallRequest(context, id), resultVal);
-            context.getMemory().add(result);
-            AgentUtils.printLog(context, result);
-        }
-    }
 }

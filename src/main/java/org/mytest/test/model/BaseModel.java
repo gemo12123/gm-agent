@@ -6,7 +6,6 @@ import org.mytest.test.context.BaseContext;
 import org.mytest.test.entity.Response;
 
 import java.util.List;
-import java.util.Map;
 
 @Data
 public abstract class BaseModel<T extends BaseContext> {
@@ -16,7 +15,7 @@ public abstract class BaseModel<T extends BaseContext> {
     public Response run() {
         Response response = null;
         context.setAgentState(AgentState.RUNNING);
-        while (context.getCurrentStep() < context.getMaxSteps() && context.getAgentState() == AgentState.RUNNING){
+        while (context.getCurrentStep() < context.getMaxSteps() && context.getAgentState() == AgentState.RUNNING) {
             context.setCurrentStep(context.getCurrentStep() + 1);
             response = step();
         }
@@ -29,5 +28,4 @@ public abstract class BaseModel<T extends BaseContext> {
 
     public abstract List<Response> action();
 
-    public abstract void captureAskResult(Map<String, String> rows);
 }
