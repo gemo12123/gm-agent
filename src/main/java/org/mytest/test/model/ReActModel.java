@@ -38,7 +38,7 @@ public class ReActModel extends BaseModel<ReActModelContext> {
 
         for (ToolExecutionRequest action : context.getActions()) {
             if ("askHuman".equals(action.name())
-                    && AgentUtils.findExistToolResult(action, context) != null) {
+                    && AgentUtils.findExistToolResult(action, context) == null) {
                 context.setAgentState(AgentState.WAITING);
                 return Response.askQuestion(action.arguments(), context.getExecId());
             }
@@ -48,11 +48,16 @@ public class ReActModel extends BaseModel<ReActModelContext> {
         List<Response> questions = actionResult.stream()
                 .filter(item -> item.getType() == ResponseType.ASK_QUESTION)
                 .toList();
-        if (!questions.isEmpty() && context.isHasParentAgent()) {
+        if (!questions.isEmpty()) {
+            // 如果允许顶级智能体向用户提问，需要处理该逻辑
+            if (!context.isHasParentAgent() && !questions.stream()
+                    .filter(item -> context.getExecId().equals(item.getExtension().get("execId")))
+                    .toList()
+                    .isEmpty()) {
+                context.setAgentState(AgentState.FINISHED);
+                return Response.normal("我有回答不了的问题！");
+            }
             answerQuestion(questions);
-        } else {
-            context.setAgentState(AgentState.FINISHED);
-            return Response.normal("我有回答不了的问题！");
         }
 
         return Response.withResponses(actionResult);
