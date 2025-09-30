@@ -5,14 +5,12 @@ import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.mytest.test.agent.Agent;
-import org.mytest.test.context.BaseContext;
 import org.mytest.test.context.ReActModelContext;
 import org.mytest.test.model.BaseModel;
 import org.mytest.test.tool.definition.AgentCallTool;
 import org.mytest.test.tool.definition.BaseTool;
 import org.mytest.test.tool.definition.FunctionCallTool;
 import org.mytest.test.tool.definition.McpTool;
-import org.mytest.test.util.AgentUtils;
 
 import java.util.UUID;
 
@@ -20,7 +18,7 @@ import java.util.UUID;
 public class DefaultToolExecutor implements ToolExecutor{
 
     @Override
-    public void executeTools(ReActModelContext context, ToolExecutionRequest request, BaseTool tool) {
+    public ToolExecutionResultMessage executeTools(ReActModelContext context, ToolExecutionRequest request, BaseTool tool) {
         String result = null;
         if (tool instanceof McpTool mcpTool){
             result = mcpTool.getMcpClient()
@@ -47,7 +45,7 @@ public class DefaultToolExecutor implements ToolExecutor{
             result = "执行异常！";
         }
         ToolExecutionResultMessage resultMessage = ToolExecutionResultMessage.from(request, result);
-        AgentUtils.printLog(context, resultMessage);
+        return resultMessage;
     }
 
     @Override

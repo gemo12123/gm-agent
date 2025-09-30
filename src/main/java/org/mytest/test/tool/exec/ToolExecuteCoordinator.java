@@ -2,9 +2,11 @@ package org.mytest.test.tool.exec;
 
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.mytest.test.context.ReActModelContext;
 import org.mytest.test.tool.definition.BaseTool;
+import org.mytest.test.util.AgentUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,17 +35,24 @@ public class ToolExecuteCoordinator {
                 baseTool = entry.getValue();
             }
         }
-        if (baseTool == null){
-            log.warn("未找到工具执行："+ request);
+        if (baseTool == null) {
+            log.warn("未找到工具执行：" + request);
             return;
         }
 
+        ToolExecutionResultMessage resultMessage = null;
         for (ToolExecutor toolExecutor : TOOL_EXECUTORS) {
             if (toolExecutor.toolName().equals(request.name())) {
-                toolExecutor.executeTools(context, request, baseTool);
-                return;
+                resultMessage = toolExecutor.executeTools(context, request, baseTool);
+                break;
             }
         }
-        DEFAULT_TOOL_EXECUTORS.executeTools(context, request, baseTool);
+
+        if(resultMessage == null){
+            resultMessage = DEFAULT_TOOL_EXECUTORS.executeTools(context, request, baseTool);
+        }
+
+        context.getMemory().add(resultMessage);
+        AgentUtils.printLog(context, resultMessage);
     }
 }

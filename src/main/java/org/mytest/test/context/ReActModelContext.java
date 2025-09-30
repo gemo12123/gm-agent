@@ -19,11 +19,11 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 public class ReActModelContext extends BaseContext {
 
+    @Builder.Default
     private Map<String, BaseModel> subTask = new HashMap<>();
 
+    @Builder.Default
     private List<String> files = new LinkedList<>();
-
-    private Map<ToolSpecification, BaseTool> tools;
 
     private String systemPrompt;
     private String nextPrompt;
@@ -32,10 +32,7 @@ public class ReActModelContext extends BaseContext {
     @Override
     public ReActModelContext cloneContext() {
         return ReActModelContext.builder()
-                .name(this.name)
-                .query(this.query)
-                .maxSteps(this.maxSteps)
-                .agentState(this.agentState)
+                .systemPrompt(this.systemPrompt)
                 .nextPrompt(this.nextPrompt)
                 .summaryPrompt(this.summaryPrompt)
                 .build();

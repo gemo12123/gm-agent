@@ -1,10 +1,18 @@
 package org.mytest.test.agent;
 
+import dev.langchain4j.agent.tool.ToolSpecification;
 import lombok.Builder;
 import lombok.Data;
 import org.mytest.test.context.BaseContext;
 import org.mytest.test.entity.Response;
 import org.mytest.test.model.BaseModel;
+import org.mytest.test.tool.definition.AgentCallTool;
+import org.mytest.test.tool.definition.BaseTool;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Builder
 @Data
@@ -17,19 +25,34 @@ public class Agent<T extends BaseContext> {
 
     private T context;
 
+    private List<BaseTool> tools;
+
     public void run(String query) {
         context.setQuery(query);
+        context.setName(name);
+        context.setExecId(UUID.randomUUID().toString());
+
+        Map<ToolSpecification, BaseTool> map = new HashMap<>();
+        for (BaseTool tool : tools) {
+            if(tool instanceof AgentCallTool agentCallTool){
+                BaseContext subContext = agentCallTool.getAgent().getContext();
+                subContext.setHasParentAgent(true);
+            }
+            map.put(tool.getToolSpecification(), tool);
+        }
+        context.setTools(map);
+
         model.setContext(context);
         Response response = model.run();
         System.out.println(response);
     }
 
-    public Agent<T> cloneAgent(){
+    public Agent<T> cloneAgent() {
         return Agent.<T>builder()
                 .name(name)
                 .description(description)
                 .model(model)
-                .context((T)context.cloneContext())
+                .context((T) context.cloneContext())
                 .build();
     }
 
