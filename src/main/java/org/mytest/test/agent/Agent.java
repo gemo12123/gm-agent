@@ -29,7 +29,7 @@ public class Agent<T extends BaseContext> {
 
     private List<BaseTool> tools;
 
-    public void run(String query) {
+    public Response run(String query) {
         context.setQuery(query);
         context.setName(name);
         context.setExecId(UUID.randomUUID().toString());
@@ -46,7 +46,10 @@ public class Agent<T extends BaseContext> {
 
         model.setContext(context);
         Response response = model.run();
-        System.out.println(response);
+        if (!context.isHasParentAgent()){
+            System.out.println(response);
+        }
+        return response;
     }
 
     public void captureAskResult(Map<String, String> rows) {

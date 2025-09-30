@@ -119,9 +119,9 @@ public class ReActModel extends BaseModel<ReActModelContext> {
 
     @Override
     public List<Response> action() {
-        ToolExecuteCoordinator.executeTools(context);
+        List<Response> responses = ToolExecuteCoordinator.executeTools(context);
         context.getActions().clear();
-        return List.of();
+        return responses;
     }
 
 }

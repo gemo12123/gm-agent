@@ -36,6 +36,7 @@ public class ReActModelContext extends BaseContext {
                 .systemPrompt(this.systemPrompt)
                 .nextPrompt(this.nextPrompt)
                 .summaryPrompt(this.summaryPrompt)
+                .hasParentAgent(this.hasParentAgent)
                 .build();
     }
 }
