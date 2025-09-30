@@ -76,10 +76,10 @@ public class ReActModel extends BaseModel<ReActModelContext> {
 
         Set<String> rowKeySet = table.rowKeySet();
         for (String rowKey : rowKeySet){
-            ReActModel reActModel = context.getSubTask().get(rowKey);
+            BaseModel<?> model = context.getSubTask().get(rowKey);
             Map<String, String> rows = table.row(rowKey);
-            reActModel.captureAskResult(rows);
-            reActModel.run();
+            model.captureAskResult(rows);
+            model.run();
         }
 
     }
@@ -121,6 +121,7 @@ public class ReActModel extends BaseModel<ReActModelContext> {
         return List.of();
     }
 
+    @Override
     public void captureAskResult(Map<String, String> rows){
         for (Map.Entry<String, String> entry : rows.entrySet()) {
             String id = entry.getKey();
