@@ -5,6 +5,8 @@ import dev.langchain4j.data.message.*;
 import lombok.extern.slf4j.Slf4j;
 import org.mytest.test.context.BaseContext;
 
+import java.util.List;
+
 @Slf4j
 public class AgentUtils {
     public static String formatMessage(ChatMessage message) {
@@ -29,27 +31,27 @@ public class AgentUtils {
             case ToolExecutionResultMessage toolResultMessage -> String.format("role:%s tool:%s result:%s\n",
                     toolResultMessage.type().name(),
                     toolResultMessage.text());
-            default -> "unknown message";
+            default -> null;
         };
     }
 
-    public static ChatMessage findExistToolResult(ToolExecutionRequest request, BaseContext context){
+    public static ChatMessage findExistToolResult(ToolExecutionRequest request, BaseContext context) {
         String id = request.id();
         for (ChatMessage chatMessage : context.getMemory()) {
-            if(chatMessage instanceof ToolExecutionResultMessage toolResultMessage
-                    && toolResultMessage.id().equals(id)){
+            if (chatMessage instanceof ToolExecutionResultMessage toolResultMessage
+                    && toolResultMessage.id().equals(id)) {
                 return chatMessage;
             }
         }
         return null;
     }
 
-    public static ToolExecutionRequest findToolCallRequest(BaseContext context, String id){
+    public static ToolExecutionRequest findToolCallRequest(BaseContext context, String id) {
         for (ChatMessage chatMessage : context.getMemory()) {
-            if(chatMessage instanceof AiMessage aiMessage){
-                if(aiMessage.hasToolExecutionRequests()){
+            if (chatMessage instanceof AiMessage aiMessage) {
+                if (aiMessage.hasToolExecutionRequests()) {
                     for (ToolExecutionRequest toolExecutionRequest : aiMessage.toolExecutionRequests()) {
-                        if(toolExecutionRequest.id().equals(id)){
+                        if (toolExecutionRequest.id().equals(id)) {
                             return toolExecutionRequest;
                         }
                     }
@@ -60,10 +62,19 @@ public class AgentUtils {
     }
 
 
-
-    public static void printLog(BaseContext context, ChatMessage message){
+    public static void printLog(BaseContext context, ChatMessage message) {
         log.info("{}({}): {}", context.getName(), context.getQuery(), AgentUtils.formatMessage(message));
     }
 
 
+    public static String historyFormat(List<ChatMessage> memory) {
+        StringBuilder sb = new StringBuilder();
+        for (ChatMessage chatMessage : memory) {
+            String s = formatMessage(chatMessage);
+            if (s != null) {
+                sb.append(s);
+            }
+        }
+        return sb.toString();
+    }
 }

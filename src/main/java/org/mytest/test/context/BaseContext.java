@@ -29,6 +29,9 @@ public abstract class BaseContext {
     protected LinkedList<ChatMessage> memory = new LinkedList<>();
 
     @Builder.Default
+    protected LinkedList<ChatMessage> summaryMemory = new LinkedList<>();
+
+    @Builder.Default
     protected List<ToolExecutionRequest> actions = new ArrayList<>();
 
     @Builder.Default

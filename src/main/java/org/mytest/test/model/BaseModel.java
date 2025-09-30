@@ -2,6 +2,7 @@ package org.mytest.test.model;
 
 import lombok.Data;
 import org.mytest.test.constant.AgentState;
+import org.mytest.test.constant.ResponseType;
 import org.mytest.test.context.BaseContext;
 import org.mytest.test.entity.Response;
 
@@ -19,8 +20,14 @@ public abstract class BaseModel<T extends BaseContext> {
             context.setCurrentStep(context.getCurrentStep() + 1);
             response = step();
         }
+
+        if (response.getType() != ResponseType.ASK_QUESTION){
+            response = summary();
+        }
         return response;
     }
+
+    public abstract Response summary();
 
     public abstract Response step();
 

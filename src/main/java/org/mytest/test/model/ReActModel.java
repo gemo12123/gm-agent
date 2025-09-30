@@ -23,6 +23,24 @@ import java.util.*;
 @Slf4j
 public class ReActModel extends BaseModel<ReActModelContext> {
     @Override
+    public Response summary() {
+        LinkedList<ChatMessage> memory = context.getMemory();
+        String history = AgentUtils.historyFormat(memory);
+        String summaryPrompt = context.getSummaryPrompt()
+                .replace("{{quey}}", context.getQuery())
+                .replace("{{taskHistory}}", history)
+                .replace("{{fileNameDesc}}", context.getFiles().toString());
+        String summaryResponse = Environment.CHAT_MODEL.chat(summaryPrompt);
+        summaryResponse = summaryResponse.replaceAll("(?s)<think>.*?</think>", "").trim();
+        LinkedList<ChatMessage> summaryMemory = context.getSummaryMemory();
+        summaryMemory.add(UserMessage.userMessage(summaryPrompt));
+        AiMessage summaryResponseMemory = AiMessage.aiMessage(summaryResponse);
+        summaryMemory.add(summaryResponseMemory);
+        AgentUtils.printLog(context, summaryResponseMemory);
+        return Response.normal(summaryResponse);
+    }
+
+    @Override
     public Response step() {
         if (context.getActions().isEmpty()) {
             think();
