@@ -24,7 +24,11 @@ public class ToolExecuteCoordinator {
         List<Response> responses = new ArrayList<>();
         List<ToolExecutionRequest> requests = context.getActions();
         for (ToolExecutionRequest request : requests) {
-            responses.add(doExecute(context, request));
+            if ("askHuman".equals(request.name())){
+                continue;
+            }
+            Response rs = doExecute(context, request);
+            responses.add(rs);
         }
         return responses;
     }

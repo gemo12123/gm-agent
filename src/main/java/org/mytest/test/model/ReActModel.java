@@ -45,7 +45,7 @@ public class ReActModel extends BaseModel<ReActModelContext> {
         if (context.getActions().isEmpty()) {
             think();
         }
-        if (context.getActions().isEmpty()) {
+        if (context.getActions().isEmpty() && !(context.getMemory().getLast() instanceof UserMessage)) {
             context.setAgentState(AgentState.FINISHED);
             return switch (context.getMemory().getLast()) {
                 case UserMessage userMessage -> Response.normal(((TextContent) userMessage.contents().get(0)).text());
@@ -58,7 +58,9 @@ public class ReActModel extends BaseModel<ReActModelContext> {
             if ("askHuman".equals(action.name())
                     && AgentUtils.findExistToolResult(action, context) == null) {
                 context.setAgentState(AgentState.WAITING);
-                return Response.askQuestion(action.arguments(), context.getExecId());
+                Response rs = Response.askQuestion(action.arguments(), context.getExecId());
+                rs.getExtension().put("toolRequest", action);
+                return rs;
             }
         }
 
@@ -84,19 +86,16 @@ public class ReActModel extends BaseModel<ReActModelContext> {
     private void answerQuestion(List<Response> questions) {
         Table<String, String, String> table = HashBasedTable.create();
         for (Response question : questions) {
-            UserMessage userMessage = UserMessage.userMessage(question.getContent().getFirst());
-            context.getMemory().add(userMessage);
-            AgentUtils.printLog(context, userMessage);
-            ChatResponse response = Environment.CHAT_MODEL.chat(ChatRequest.builder()
-                    .messages(context.getMemory())
-                    .toolSpecifications(new ArrayList<>(context.getTools().keySet()))
-                    .build());
-            AiMessage aiMessage = response.aiMessage();
-            context.getMemory().add(aiMessage);
+            ToolExecutionResultMessage message = ToolExecutionResultMessage.from((ToolExecutionRequest) question.getExtension().get("toolRequest"),
+                    question.getContent().getFirst());
+            context.getMemory().add(message);
+            AgentUtils.printLog(context, message);
+
+            Response step = step();
 
             String execId = question.getExtension().get("execId").toString();
             String id = question.getExtension().get("id").toString();
-            String answer = aiMessage.text();
+            String answer = step.getContent().getFirst();
             table.put(execId, id, answer);
         }
 
@@ -114,7 +113,7 @@ public class ReActModel extends BaseModel<ReActModelContext> {
     @Override
     public void think() {
         LinkedList<ChatMessage> memory = context.getMemory();
-        if (context.getCurrentStep() == 1) {
+        if (!context.isInitialized()) {
             SystemMessage systemMessage = SystemMessage.systemMessage(context.getSystemPrompt()
                     .replace("{{date}}",
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
@@ -122,6 +121,7 @@ public class ReActModel extends BaseModel<ReActModelContext> {
             UserMessage userMessage = UserMessage.userMessage(context.getQuery());
             memory.add(userMessage);
             AgentUtils.printLog(context, userMessage);
+            context.setInitialized(true);
         } else {
             UserMessage userMessage = UserMessage.from(context.getNextPrompt().replace("{{query}}", context.getQuery()));
             memory.add(userMessage);

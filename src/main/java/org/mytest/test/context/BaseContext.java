@@ -17,6 +17,10 @@ import java.util.Map;
 @Data
 @SuperBuilder
 public abstract class BaseContext {
+
+    @Builder.Default
+    protected boolean isInitialized = false;
+
     protected String execId;
 
     protected String name;

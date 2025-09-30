@@ -32,7 +32,9 @@ public class Agent<T extends BaseContext> {
     public Response run(String query) {
         context.setQuery(query);
         context.setName(name);
-        context.setExecId(UUID.randomUUID().toString());
+        if (context.getExecId() == null) {
+            context.setExecId(UUID.randomUUID().toString());
+        }
 
         Map<ToolSpecification, BaseTool> map = new HashMap<>();
         for (BaseTool tool : tools) {
