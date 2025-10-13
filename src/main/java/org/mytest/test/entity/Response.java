@@ -40,12 +40,13 @@ public class Response {
         return response;
     }
 
-    public static Response askQuestion(String content, String execId) {
+    public static Response askQuestion(String content, String execId, String requestId) {
         Response response = new Response();
         response.type = ResponseType.ASK_QUESTION;
         response.content = List.of(content);
         HashMap<String, Object> map = new HashMap<>();
         map.put("execId", execId);
+        map.put("requestId", requestId);
         map.put("id", UUID.randomUUID().toString());
         response.extension = map;
         return response;

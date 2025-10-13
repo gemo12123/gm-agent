@@ -58,7 +58,7 @@ public class ReActModel extends BaseModel<ReActModelContext> {
             if ("askHuman".equals(action.name())
                     && AgentUtils.findExistToolResult(action, context) == null) {
                 context.setAgentState(AgentState.WAITING);
-                Response rs = Response.askQuestion(action.arguments(), context.getExecId());
+                Response rs = Response.askQuestion(action.arguments(), context.getExecId(), action.id());
                 rs.getExtension().put("toolRequest", action);
                 return rs;
             }
@@ -94,9 +94,9 @@ public class ReActModel extends BaseModel<ReActModelContext> {
             Response step = step();
 
             String execId = question.getExtension().get("execId").toString();
-            String id = question.getExtension().get("id").toString();
+            String requestId = question.getExtension().get("requestId").toString();
             String answer = step.getContent().getFirst();
-            table.put(execId, id, answer);
+            table.put(execId, requestId, answer);
         }
 
         Set<String> rowKeySet = table.rowKeySet();

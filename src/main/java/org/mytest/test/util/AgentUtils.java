@@ -28,7 +28,7 @@ public class AgentUtils {
                         aiMessage.type().name(),
                         aiMessage.text());
             }
-            case ToolExecutionResultMessage toolResultMessage -> String.format("role:%s tool:%s result:%s\n",
+            case ToolExecutionResultMessage toolResultMessage -> String.format("role:%s tool:%s\n",
                     toolResultMessage.type().name(),
                     toolResultMessage.text());
             default -> null;
